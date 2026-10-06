@@ -34,7 +34,7 @@
 | | MSC Apex / Patran / Marc (Hexagon), Visual-Mesh (Keysight·ESI) | — | — | — | 📄 |
 | | Ansys Prime(PyPrimeMesh), SpaceClaim/Discovery, LS-PrePost | — | 커뮤니티 MCP만 있음. 참고로 Mechanical의 **Mesh Agent**(2026 R1)는 제품 내장 기능이며 MCP가 아님 | — | ✅🔎 |
 | | Coreform Cubit, Onshape/SimScale, Autodesk Fusion Simulation, MIDAS | — | SimScale은 Onshape 내장 AI 에이전트(2026-09), Fusion은 API 스크립트 실행 **샘플** MCP만 | — | 🔎📄 |
-| | Gmsh, FreeCAD, Salome 등 오픈소스 | — (프로젝트 공식 MCP 없음) | 커뮤니티 MCP 다수 (§2.8) | — | 📄 |
+| | Gmsh, FreeCAD, Salome, CalculiX, OpenFOAM 등 오픈소스 | — (프로젝트 공식 MCP 없음) | 커뮤니티 MCP 다수(§2.8). 공식 조직의 MCP는 Kitware `vtk-mcp`(API 지식)처럼 메싱과 무관한 것뿐 | — | ✅📄 |
 
 ### HyperMesh 사용자 관점 핵심 시사점
 
@@ -107,7 +107,7 @@
 
 | 서버 | 메싱 관련 기능 | 비고 |
 |---|---|---|
-| **PyMechanical-MCP** | 도구는 24개이고 그중 메시 전용 도구는 없다. 메싱은 `run_python_script`로 Mechanical 스크립트를 실행해서 한다. `get_guidelines_for("meshing")`가 사이징·MultiZone·메시 통계 사용법을 안내하고, "skewness > 0.95 또는 aspect ratio > 50이면 문제"라는 기준을 제시한다 📄 | stdio/HTTP 지원. 클라이언트는 VS Code, Claude Code, Claude Desktop. Mechanical에는 gRPC로 연결 ✅ |
+| **PyMechanical-MCP** | 도구는 24개이고 그중 메시 전용 도구는 없다. 메싱은 `run_python_script`로 Mechanical 스크립트를 실행해서 한다. `get_guidelines_for("meshing")`가 사이징·MultiZone·메시 통계 사용법을 안내하고, "skewness > 0.95 또는 aspect ratio > 50이면 문제"라는 기준을 제시한다 📄 | stdio/HTTP 지원. 클라이언트는 VS Code, Claude Code, Claude Desktop ✅. Mechanical에는 gRPC로 연결 📄 |
 | **PyMAPDL-MCP** | `run_mapdl_command(s)`와 `run_python_code`로 임의 APDL을 실행하므로 ET/MP/ESIZE/VMESH 등을 쓸 수 있다. 가이드라인에 메시 항목이 있다 📄 | 로컬, 원격, Docker 모두 가능. README에는 메싱이 명시돼 있지 않다 ✅ |
 | **PyFluent-MCP** | Fluent를 meshing 모드로 띄워 Watertight Geometry, Fault-tolerant Meshing, 2D Meshing 워크플로를 실행한다. `mesh_quality` 도구는 셀·면·노드 수, skewness, orthogonal quality, aspect ratio를 반환한다 ✅ | 도구 20개. CFD 메싱 위주 |
 
@@ -133,7 +133,7 @@
 - **2026-09-16 보도자료** 🔎 ([COMSOL](https://www.comsol.com/press-release/la-modellazione-di-sistema-e-lintelligenza-artificiale-agentica-sono-protagoniste-in-comsol-multiphysics-versione-2027-14722), [Laser Focus World 전재](https://www.laserfocusworld.com/directory/services-software/software-cad-cae-cam/press-release/55405579/comsol-system-level-modeling-and-agentic-ai-take-the-spotlight-in-comsol-multiphysics-version-2027))
   - *"Version 2027 … with the new COMSOL MCP Server, which uses the Model Context Protocol (MCP) to provide a standardized way for AI agents to interact directly with COMSOL Multiphysics."*
   - 에이전트가 COMSOL API로 모델을 만들거나 수정하고, 해석을 실행하고, 결과를 보고 다음 행동을 결정한다. 사용자는 COMSOL Desktop에서 그 작업을 검토하고 수정할 수 있다.
-  - 출시 시점은 "later this fall"이다. 10-06 기준 정식 출시(GA) 여부는 확인하지 못했다. 도구 목록, 전송 방식, 라이선스 조건도 미공개다.
+  - 출시 시점은 "later this fall"이다. 2026-10-06 기준 정식 출시(GA) 여부는 확인하지 못했다. 도구 목록, 전송 방식, 라이선스 조건도 미공개다.
 - **이전 단계 (MCP 아님)** 📄
   - 6.3: Chatbot 창 도입. OpenAI GPT로 COMSOL Java API 코드를 생성하고 디버그한다.
   - 6.4: OpenAI 호환 API를 쓰는 여러 LLM 공급자를 지원한다.
@@ -244,15 +244,32 @@
 | McNeel Rhino | **공식** (RhinoAI 0.x) | 형상 생성·편집용이다. FE 메시는 다루지 않는다 | 📄 |
 | Luminary Cloud, nTop, Rescale, Quanscient | 찾지 못함 | — | 📄 |
 
-### 2.8 오픈소스 메셔·솔버
+### 2.8 오픈소스 메셔·솔버와 MCP 레지스트리
 
-> 오픈소스·레지스트리 조사 결과를 반영하는 절이다. 상세는 `_workspace/05_opensource-registries.md`에 있다.
+**결론**
+- 다음 프로젝트는 **모두 공식 MCP가 없다**: Gmsh, FreeCAD, Salome/Code_Aster, Netgen/NGSolve, MeshLab, TetGen/fTetWild, CalculiX/PrePoMax, Elmer, FEniCS, MOOSE, deal.II, OpenFOAM, SU2. 확인 방법은 각 프로젝트 공식 GitHub 조직의 "mcp" 검색이다 📄.
+- 프로젝트 공식 조직이 직접 올린 MCP는 3개뿐이다. 셋 다 **메싱을 하지 않는다.**
+  - `Kitware/vtk-mcp`: VTK API 지식, 문서 검색, 코드 검증 ✅
+  - `pyvista/pyvista-mcp-server`: `hello_world` 데모 수준
+  - `CadQuery/cadquery-contrib`의 MCP: CAD 전용
+- 실제로 메시를 만드는 오픈소스 계열 MCP는 **모두 커뮤니티 작품**이다. 대부분 2026년에 나왔고 대부분 20★ 미만이다.
 
-| 도구 | MCP 현황 | 비고 |
-|---|---|---|
-| OpenFOAM (+ Gmsh) | **Foam-Agent**(RPI 연구 프로젝트)가 MCP 서버를 내장했다(`claude mcp add foamagent -- foamagent-mcp`). 도구는 `plan`, `input_writer`, `run`, `review`, `apply_fixes`, `run_case`, `visualization`이고 stdio와 HTTP(포트 7860)를 지원한다 ✅ | OpenFOAM 재단이 낸 공식 서버는 아니다. 외부 Gmsh `.msh`, blockMesh/snappyHexMesh 메싱. 338★ |
-| ParaView | **ParaView-MCP**(LLNL 연구, IEEE VIS 2025) 📄 | Kitware 공식 아님. 후처리 시각화용 |
-| Gmsh, FreeCAD FEM, Salome, CalculiX 등 | 커뮤니티 MCP만 있다(§2.8 보완 예정) | 프로젝트 공식 MCP는 확인하지 못했다 |
+| 도구 | 대표 커뮤니티 MCP | 메싱 관련 기능 | 성숙도 |
+|---|---|---|---|
+| **Gmsh** | `OFFTECH/gmsh-mcp-server` | 도구 36개: OCC 형상·불리언, transfinite·O-H 블록 템플릿, 품질 히스토그램(minSICN/minDetJac), MSH 2.2 출력. 임의 CAD를 자동으로 블록 분할하지는 못한다 | 신생(2026-09) |
+| **FreeCAD FEM** | `neka-nat/freecad-mcp` (2.7k★ ✅), `gchen19/AnkusDrive`, `tessalabs-space/freecad-mcp` | neka-nat에는 `run_fem_analysis`(CalculiX 실행)가 있으나 메시 도구는 없다. AnkusDrive는 도구 280개 이상으로 Gmsh/Netgen 메싱을 한다. tessalabs는 중립면·defeaturing과 UNV/INP/MED/BDF 출력을 지원한다 | neka-nat만 대중적 |
+| **Salome** | `gnshb/salome-mcp` | GEOM 형상·그룹, SMESH Netgen 1D-2D-3D 메싱과 통계 | 프로토타입 |
+| **CalculiX** | `Casys-AI/mcp-calculix`, `mcp-fea`, CAE-Agent-Hub CalculiX | STEP → Gmsh 사면체(C3D10) → ccx. mcp-fea는 캔틸레버 처짐 오차 0.02%, NAFEMS LE10 1.41%를 자체 보고 | 신생, 잘 설계됨 |
+| **Elmer / FEniCS / SU2** | FEP-Agent-Hub, `agentfem-mcp`, `cmudrc/su2-mcp` | Gmsh 연동 메싱 → 해석. 해석해와 비교 검증 | 초기 |
+| **OpenFOAM** | **Foam-Agent**(RPI, 338★ ✅), `webworn/openfoam-mcp-server`(121★) | Foam-Agent는 MCP 도구 `plan`, `input_writer`, `run`, `review`, `apply_fixes`, `run_case`, `visualization`을 제공하고 stdio와 HTTP(포트 7860)를 지원한다. `claude mcp add foamagent -- foamagent-mcp`로 연결하며 Gmsh `.msh`, blockMesh/snappyHexMesh 메싱을 쓴다 ✅ | 가장 성숙. 단 OpenFOAM 재단 공식은 아님 |
+| **ParaView** | `LLNL/paraview_mcp` (IEEE VIS 2025) | 후처리 시각화만 한다. pvserver 동기화 방식이 낡아 불안정하다는 경고가 있다 | 연구 프로토타입 |
+
+**MCP 레지스트리 조사 결과** 📄
+- 공식 MCP Registry(`registry.modelcontextprotocol.io`)를 약 70개 검색어로 조회했다.
+- 다음 검색어는 **등록 0건**이었다: gmsh, abaqus, comsol, hypermesh·altair·optistruct, ANSA, LS-DYNA, nastran·femap, calculix, salome, fenics.
+- Ansys 공식 PyAnsys MCP들도 **레지스트리에 등록돼 있지 않다.**
+- awesome-mcp-servers류 목록에도 CAE 분류는 없다.
+- → **CAE용 MCP는 레지스트리보다 GitHub에서 직접 찾아야 한다.** 이번 조사도 대부분 GitHub 탐색으로 찾았다.
 
 ---
 
@@ -262,7 +279,7 @@
 
 | 저장소 | 최근 활동 (2026) | ★ / 라이선스 | 연결 방식 | 주요 기능 | 성숙도 |
 |---|---|---|---|---|---|
-| **`Cai-aa/CAE-Agent-Hub`의 HyperWorks MCP** | v0.10.0 (첫 커밋 07-16) | 저장소 998★ / MIT | HyperWorks 내부 Python 확장(Qt 메인 스레드, 127.0.0.1, 요청마다 토큰 인증) + HyperMesh Batch로 Tcl 선별 실행 | 프로젝트 관리. CAD 가져오기(STEP/IGES/Parasolid). automesh, solid map, 사면체, 원통형 O-grid. 강체·RBE3·용접, 솔버 카드·하중, HyperStudy, Job 제출, HyperView 후처리 | 가장 포괄적이다. **임의 Tcl·Python·셸 실행을 금지**하고 허용 목록만 쓴다. 호출당 5,000 노드·요소 제한. OptiStruct 6종, Radioss 4종 검증. Abaqus는 일부만 지원 ✅ |
+| **`Cai-aa/CAE-Agent-Hub`의 HyperWorks MCP** | v0.10.0 (07-16 ~ 08-18) | 저장소 998★ / MIT | HyperWorks 내부 Python 확장(Qt 메인 스레드, 127.0.0.1, 요청마다 토큰 인증) + HyperMesh Batch로 Tcl 선별 실행 | 프로젝트 관리. CAD 가져오기(STEP/IGES/Parasolid). `automesh_live_surfaces`, `solid_map_live_solids`, `tetra_mesh_live_solids`, 원통형 O-grid. `get_live_mesh_quality`, `repair_live_mesh_quality`. 실패하면 `.hm` 체크포인트로 롤백. 강체·RBE3·용접, 솔버 카드·하중, HyperStudy, Job 제출, HyperView 후처리 | 가장 포괄적이다. **임의 Tcl·Python·셸 실행을 금지**하고 허용 목록만 쓴다. 호출당 5,000 노드·요소 제한. OptiStruct 6종, Radioss 4종 검증. 크래시 박스 등 일부 템플릿은 잠금. Abaqus는 일부만 지원 ✅ |
 | **`jinkeguo/cax-workflow-agent`** | 07-26 | 1★ / MIT | Codex 플러그인(MCP 도구 32개). SolidWorks는 COM, HyperMesh는 Tcl/batch 어댑터로 연결 | Solid map 메싱(C3D8R). Jacobian·종횡비·최소 길이 품질 체크. Abaqus 덱 출력, datacheck, 제출, ODB 추출, 실패 진단과 복구 | **HyperMesh 2025 + Abaqus 2022에서 실제로 검증됐다.** 형상·메시 정책·재료·접촉·하중·BC를 바꿀 때는 **사람 승인이 필요하다**. 사용자의 HyperMesh+Abaqus 워크플로에 가장 가깝다 ✅ |
 | `times1234/hypermesh-mcp` | 05-11 ~ 08-10 | 10★ / 라이선스 미표기 | hmbatch + GUI 소켓 리스너(47881) | 형상을 탐색(probe)해 자동 분류한다. 압출형은 drag hex, 회전체는 spin hex, 복잡 형상은 기어 인식 tet. v5.0에서 ANSA 연동 추가 | 생성기가 만든 스크립트가 아니면 **메싱 Tcl을 직접 실행하지 못한다.** PulseMCP에 등재됐다 ✅ |
 | `yesooner/hyper-dyna-mcp` | 06-12 | 18★ / **AGPL-3.0** | FastMCP stdio + `hmcustom.tcl` 리스너(47883), GUI 전용 | `hm_modeling_action`: 메시·요소 생성, 재료·물성, 구속·하중. LS-DYNA 모델링용 | 규칙: *"Do not guess unverified HyperMesh Tcl commands"*. `*tetmesh`, 표면 automesh, K 파일 출력은 차단 ✅ |
@@ -319,7 +336,7 @@
 | 주체 | 내용 | 시기 | MCP | 검증 |
 |---|---|---|---|---|
 | **Altair + Lucid Motors** | 웨비나 "AI Agents of Change". AI 에이전트가 CAD를 가져오고 재료·BC를 설정했다. Lucid **시트 프레임** 워크플로에서는 메타데이터 태그로 설계 표준을 강제했다. 벤더 주장 효과는 셋업 시간 "수 시간 → 수 분"이다 | 2025-09-25 | 명시 안 됨 | 🔎 ([Altair](https://altair.com/resource/ai-agents-of-change-automate-accelerate-simulate-featuring-lucid-motors)) |
-| **SimuTech Group** (Ansys 파트너) | Google Antigravity를 **Ansys Mechanical MCP 서버**로 실행 중인 Mechanical 세션에 연결했다. 브래킷 모델을 살펴보고 모달·정적 해석 워크플로를 구성했으며, 랜덤 진동과 피로까지 탐색했다 | 2025~26 | **예** | 📄 |
+| **SimuTech Group** (Ansys 파트너) | Google Antigravity를 **Ansys Mechanical MCP 서버**를 통해 실행 중인 Mechanical 세션에 연결했다. 브래킷 모델을 살펴보고 모달·정적 해석 워크플로를 구성했으며, 랜덤 진동과 피로까지 탐색했다 | 2025~26 | **예** | 📄 |
 | **Ansys (Synopsys)** | Innovation Space 교육 과정 "Agentic AI for Ansys Mechanical and MAPDL Workflows"(Claude Code·Codex·Cursor·Copilot) | 2026 | 추정 | 📄 |
 | **BMW Group + Mistral AI** | BMW 충돌해석 데이터 1 PB 이상으로 학습한 도메인 특화 "Large Industry Models". 충돌해석 결과 분석 가속이 목적이고 메싱은 다루지 않는다 | 2026-05 | 아니오 | 📄 |
 | **SimScale (Onshape 앱)** | 프롬프트 한 번으로 CAD → 셋업 제안 → 메시 → 해석 → 결과 설명까지 진행한다 | 2026-09 | 미확인 | 🔎 ([SimScale](https://www.simscale.com/press/simscale-launches-engineering-ai-agent-for-onshape/)) |
@@ -415,7 +432,7 @@
 
 | 항목 | 상태 |
 |---|---|
-| COMSOL MCP Server 정식 출시와 사양 | "올가을" 출시 예정. 10-06 기준 출시 여부, 도구 목록, 라이선스 조건 미확인 |
+| COMSOL MCP Server 정식 출시와 사양 | "올가을" 출시 예정. 2026-10-06 기준 출시 여부, 도구 목록, 라이선스 조건 미확인 |
 | BETA CAE(ANSA) AI Assistant의 MCP 지원 여부 | 2026.1 "Agentic AI"는 확인했으나 MCP 언급은 미확인(beta-cae.com 직접 열람 불가) |
 | Ansys Engineering Copilot, Mesh Agent의 내부 MCP 사용 여부 | 미확인. 공식 서버의 `--on-aali` 플래그로 보아 Ansys 자체 AI 플랫폼(AALI)과 연동하는 구조로 추정 📄 |
 | Siemens Intelligence Center X의 MCP 연동 | 파트너(CLEVR) 자료에만 언급됨 |
@@ -455,6 +472,8 @@
 - Whfkl/Abaqus-Control-MCP: https://github.com/Whfkl/Abaqus-Control-MCP
 - Foam-Agent: https://github.com/csml-rpi/Foam-Agent
 - microneedle-skin-pullout: https://github.com/TmxjTmxj/microneedle-skin-pullout
+- neka-nat/freecad-mcp: https://github.com/neka-nat/freecad-mcp
+- Kitware/vtk-mcp (공식 조직, 메싱 아님): https://github.com/Kitware/vtk-mcp
 
 **학술 (🔎/📄)**
 - AbaqusAgent: https://arxiv.org/abs/2606.00138
