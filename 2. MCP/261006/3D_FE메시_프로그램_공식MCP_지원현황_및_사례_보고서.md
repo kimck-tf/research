@@ -89,6 +89,7 @@
   - `Development Status :: 3 - Alpha`
   - Python 3.12 이상
 - 모든 서버는 **사용자 PC에 설치된 라이선스 Ansys**에 접속하는 방식이다. MCP 서버를 설치한다고 해석 라이선스가 생기지는 않는다.
+- 사용 조건(PyMechanical-MCP): Ansys Mechanical **2024 R2(v242) 이상** + 라이선스, Python 3.12~3.14, Windows/Linux ✅. 자세한 내용과 설치 절차는 `_REPORT_Ansys_MCP_알파_사용조건_261006.md`에 정리했다.
 
 **공개 타임라인 (PyPI 업로드일 기준, ✅)**
 
@@ -490,6 +491,7 @@
 ```
 2. MCP/261006/
 ├── 3D_FE메시_프로그램_공식MCP_지원현황_및_사례_보고서.md   ← 본 보고서
+├── _REPORT_Ansys_MCP_알파_사용조건_261006.md               ← Q&A: 알파 의미, 사용 조건, 설치 절차
 └── _workspace/
     ├── 00_input/REQUEST.md                 ← 요청·조사 범위·분업
     ├── 01_ansys-cadence.md                 ← Ansys(Synopsys), Cadence(BETA CAE)
